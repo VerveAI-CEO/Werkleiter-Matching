@@ -119,12 +119,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // --- Participants Array ---
-let participants = [
-  {id:1,name:"Alice",role:"commercial",factory:"Berlin",weOffer:"Consulting",weSeek:"Technical Support",keyTakeaways:"-",contactPartners:"-"},
-  {id:2,name:"Bob",role:"technical",factory:"Munich",weOffer:"Engineering",weSeek:"Project Management",keyTakeaways:"-",contactPartners:"-"},
-  ...
-  {id:50,name:"Zoe",role:"technical",factory:"Stuttgart",weOffer:"QA",weSeek:"Automation",keyTakeaways:"-",contactPartners:"-"}
-];
+let participants = [];
   
 // --- Admin Login ---
 document.getElementById("adminLoginBtn").onclick = () => {
@@ -275,5 +270,6 @@ createGroupsBtn.addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
+
 
 

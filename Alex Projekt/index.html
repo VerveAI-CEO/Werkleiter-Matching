@@ -48,6 +48,14 @@ textarea { min-height:80px; resize:vertical; }
 <h2 style="text-align:center;">Participation Form</h2>
 <form id="customerForm">
 <label>Name</label><input id="c-name" required>
+
+<label>Role</label>
+<select id="c-role" required>
+  <option value="">Select Role</option>
+  <option value="commercial">Commercial</option>
+  <option value="technical">Technical</option>
+</select>
+
 <label>Factory / Location</label><input id="c-factory" required>
 <label>We offer</label><textarea id="c-offer" required></textarea>
 <label>We seek</label><textarea id="c-seek" required></textarea>
@@ -120,7 +128,7 @@ const db = firebase.firestore();
 
 // --- Participants Array ---
 let participants = [];
-  
+
 // --- Admin Login ---
 document.getElementById("adminLoginBtn").onclick = () => {
     let password = prompt("Enter admin password:");
@@ -144,6 +152,7 @@ document.getElementById("customerForm").addEventListener("submit",(e)=>{
     e.preventDefault();
     const entry = {
         name: document.getElementById("c-name").value,
+        role: document.getElementById("c-role").value, // Rolle hinzufügen
         factory: document.getElementById("c-factory").value,
         weOffer: document.getElementById("c-offer").value,
         weSeek: document.getElementById("c-seek").value,
@@ -205,8 +214,8 @@ document.getElementById('participant-form').addEventListener('submit',(e)=>{
     document.getElementById('participant-form').reset();
 });
 
-// --- KI & Group generation (unchanged) ---
-const API_KEY = "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";
+// --- KI & Group generation ---
+const API_KEY = "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";
 const createGroupsBtn = document.getElementById('create-groups');
 const resultsContainer = document.getElementById('results-container');
 const loadingElement = document.getElementById('loading');
@@ -267,9 +276,45 @@ createGroupsBtn.addEventListener('click', async ()=>{
 
     loadingElement.style.display='none';
 });
+
+// --- Example participants ---
+const exampleParticipants = [
+  {name:"Alice",role:"commercial",factory:"Berlin",weOffer:"Logistics",weSeek:"Supplies",keyTakeaways:"Efficiency",contactPartners:"Bob"},
+  {name:"Bob",role:"technical",factory:"Munich",weOffer:"Engineering",weSeek:"Components",keyTakeaways:"Innovation",contactPartners:"Alice"},
+  {name:"Charlie",role:"commercial",factory:"Hamburg",weOffer:"Consulting",weSeek:"Partners",keyTakeaways:"Networking",contactPartners:"David"},
+  {name:"David",role:"technical",factory:"Frankfurt",weOffer:"Maintenance",weSeek:"Tools",keyTakeaways:"Safety",contactPartners:"Charlie"},
+  {name:"Eva",role:"commercial",factory:"Stuttgart",weOffer:"Marketing",weSeek:"Clients",keyTakeaways:"Branding",contactPartners:"Frank"},
+  {name:"Frank",role:"technical",factory:"Cologne",weOffer:"Automation",weSeek:"Parts",keyTakeaways:"Precision",contactPartners:"Eva"},
+  {name:"Grace",role:"commercial",factory:"Leipzig",weOffer:"Sales",weSeek:"Leads",keyTakeaways:"Growth",contactPartners:"Hannah"},
+  {name:"Hannah",role:"technical",factory:"Dresden",weOffer:"Support",weSeek:"Hardware",keyTakeaways:"Reliability",contactPartners:"Grace"},
+  {name:"Ian",role:"commercial",factory:"Bremen",weOffer:"Strategy",weSeek:"Consultants",keyTakeaways:"Planning",contactPartners:"Jack"},
+  {name:"Jack",role:"technical",factory:"Nuremberg",weOffer:"Software",weSeek:"APIs",keyTakeaways:"Integration",contactPartners:"Ian"},
+  {name:"Karen",role:"commercial",factory:"Hannover",weOffer:"Finance",weSeek:"Investors",keyTakeaways:"Profit",contactPartners:"Leo"},
+  {name:"Leo",role:"technical",factory:"Dortmund",weOffer:"Production",weSeek:"Materials",keyTakeaways:"Efficiency",contactPartners:"Karen"},
+  {name:"Mona",role:"commercial",factory:"Essen",weOffer:"HR",weSeek:"Talents",keyTakeaways:"Teamwork",contactPartners:"Nina"},
+  {name:"Nina",role:"technical",factory:"Bonn",weOffer:"Design",weSeek:"Components",keyTakeaways:"Innovation",contactPartners:"Mona"},
+  {name:"Oscar",role:"commercial",factory:"Kiel",weOffer:"Legal",weSeek:"Guidance",keyTakeaways:"Compliance",contactPartners:"Paul"},
+  {name:"Paul",role:"technical",factory:"Magdeburg",weOffer:"IT",weSeek:"Software",keyTakeaways:"Security",contactPartners:"Oscar"},
+  {name:"Quinn",role:"commercial",factory:"Mainz",weOffer:"Procurement",weSeek:"Vendors",keyTakeaways:"Cost-saving",contactPartners:"Rita"},
+  {name:"Rita",role:"technical",factory:"Saarbrücken",weOffer:"Testing",weSeek:"Tools",keyTakeaways:"Quality",contactPartners:"Quinn"},
+  {name:"Sam",role:"commercial",factory:"Freiburg",weOffer:"Research",weSeek:"Data",keyTakeaways:"Insights",contactPartners:"Tina"},
+  {name:"Tina",role:"technical",factory:"Heidelberg",weOffer:"Support",weSeek:"Hardware",keyTakeaways:"Reliability",contactPartners:"Sam"},
+  {name:"Uma",role:"commercial",factory:"Ulm",weOffer:"Consulting",weSeek:"Clients",keyTakeaways:"Networking",contactPartners:"Victor"},
+  {name:"Victor",role:"technical",factory:"Würzburg",weOffer:"Engineering",weSeek:"Parts",keyTakeaways:"Innovation",contactPartners:"Uma"},
+  {name:"Wendy",role:"commercial",factory:"Regensburg",weOffer:"Marketing",weSeek:"Partners",keyTakeaways:"Branding",contactPartners:"Xander"},
+  {name:"Xander",role:"technical",factory:"Kassel",weOffer:"Automation",weSeek:"Components",keyTakeaways:"Precision",contactPartners:"Wendy"},
+  {name:"Yara",role:"commercial",factory:"Augsburg",weOffer:"Sales",weSeek:"Leads",keyTakeaways:"Growth",contactPartners:"Zane"},
+  {name:"Zane",role:"technical",factory:"Potsdam",weOffer:"Maintenance",weSeek:"Tools",keyTakeaways:"Safety",contactPartners:"Yara"},
+];
+
+// --- Add example participants to Firebase (only if DB is empty) ---
+db.collection("participants").get().then(snapshot=>{
+    if(snapshot.empty){
+        exampleParticipants.forEach(p=>{
+            db.collection("participants").add({...p, created: firebase.firestore.FieldValue.serverTimestamp()});
+        });
+    }
+});
 </script>
 </body>
 </html>
-
-
-

@@ -1,322 +1,509 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matching System</title>
-<style>
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --success-color: #27ae60;
-    --commercial-color: #9b59b6;
-    --technical-color: #e67e22;
-}
-* { box-sizing: border-box; margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-body { background-color:#f5f7fa; color:#333; line-height:1.6; padding:20px; }
-.container { max-width:1000px; margin:0 auto; }
-header { background-color:var(--primary-color); color:white; padding:1.5rem; text-align:center; margin-bottom:2rem; border-radius:10px; }
-.input-section, .results-section { background:white; padding:25px; border-radius:10px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-.form-group { margin-bottom:1.5rem; }
-label { display:block; margin-bottom:0.5rem; font-weight:bold; color:#444; }
-input, textarea, select { width:100%; padding:12px; border:1px solid #ddd; border-radius:5px; font-size:1rem;}
-textarea { min-height:80px; resize:vertical; }
-.btn { background-color:var(--secondary-color); color:white; border:none; padding:12px 20px; border-radius:5px; cursor:pointer; font-size:1rem; font-weight:600; transition: background-color 0.3s; }
-.btn-success { background-color: var(--success-color);}
-.btn:hover { background-color:#2980b9;}
-.btn-success:hover { background-color:#219955;}
-.participant-card { background:#f8f9fa; border:1px solid #dee2e6; border-radius:5px; padding:15px; margin-bottom:15px; }
-.role-badge { padding:3px 8px; border-radius:3px; font-size:0.8rem; font-weight:bold; color:white; margin-left:10px; }
-.role-commercial { background-color: var(--commercial-color);}
-.role-technical { background-color: var(--technical-color);}
-.loading { text-align:center; padding:30px; }
-.spinner { border:5px solid #f3f3f3; border-top:5px solid var(--secondary-color); border-radius:50%; width:50px; height:50px; animation:spin 1s linear infinite; margin:0 auto 15px;}
-@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
-.explanation-full { background:#f0f4f8; padding:10px; border-radius:5px; margin-top:5px; display:none; }
-#adminLoginBtn { display:block; margin:30px auto; text-align:center; font-size:16px; color:gray; cursor:pointer; text-decoration:underline; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching System</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --commercial-color: #9b59b6;
+            --technical-color: #e67e22;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { background-color: var(--primary-color); color: white; padding: 1.5rem; text-align: center; margin-bottom: 2rem; border-radius: 10px; }
+        .input-section, .results-section { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #444; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        textarea { min-height: 80px; resize: vertical; }
+        .btn { background-color: var(--secondary-color); color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color 0.3s; }
+        .btn-success { background-color: var(--success-color); }
+        .btn:hover { background-color: #2980b9; }
+        .btn-success:hover { background-color: #219955; }
+        .participant-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
+        .role-badge { padding: 3px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: bold; color: white; margin-left: 10px; }
+        .role-commercial { background-color: var(--commercial-color); }
+        .role-technical { background-color: var(--technical-color); }
+        .loading { text-align: center; padding: 30px; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--secondary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .explanation-full { background: #f0f4f8; padding: 10px; border-radius: 5px; margin-top: 5px; display: none; }
+        #adminLoginBtn { display: block; margin: 30px auto; text-align: center; font-size: 16px; color: gray; cursor: pointer; text-decoration: underline; }
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+        /* small panel next to generate button — flexibles Layout (Option B) */
+        .alt-panel {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;         /* sorgt für Umbruch auf kleinen Bildschirmen */
+        }
+        .alt-panel label {
+            flex: 0 0 auto;
+        }
+        .alt-panel input[type="number"],
+        .alt-panel select {
+            flex: 0 0 140px;         /* feste Basisbreite, passt sich aber im Wrap an */
+            min-width: 100px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .alt-panel .btn { padding: 8px 12px; }
+    </style>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <!-- Customer Section -->
-<div id="customerSection" style="max-width:600px; margin:0 auto;">
-<h2 style="text-align:center;">Participation Form</h2>
-<form id="customerForm">
-<label>Name</label><input id="c-name" required>
-
-<label>Role</label>
-<select id="c-role" required>
-  <option value="">Select Role</option>
-  <option value="commercial">Commercial</option>
-  <option value="technical">Technical</option>
-</select>
-
-<label>Factory / Location</label><input id="c-factory" required>
-<label>We offer</label><textarea id="c-offer" required></textarea>
-<label>We seek</label><textarea id="c-seek" required></textarea>
-<label>Key Takeaways</label><textarea id="c-key-takeaways"></textarea>
-<label>Contact Partners</label><textarea id="c-contact-partners"></textarea>
-<button class="btn" style="margin-top:15px;">Submit</button>
-</form>
-<div id="customerSuccess" style="display:none; margin-top:20px; font-size:22px; font-weight:bold;">You are registered!</div>
+<div id="customerSection" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="text-align:center;">Participation Form</h2>
+    <form id="customerForm">
+        <label>Name</label><input id="c-name" required>
+        <label>Role</label>
+        <select id="c-role" required>
+            <option value="">Select Role</option>
+            <option value="commercial">Commercial</option>
+            <option value="technical">Technical</option>
+        </select>
+        <label>Factory / Location</label><input id="c-factory" required>
+        <label>We offer</label><textarea id="c-offer" required></textarea>
+        <label>We seek</label><textarea id="c-seek" required></textarea>
+        <label>Key Takeaways</label><textarea id="c-key-takeaways"></textarea>
+        <label>Contact Partners</label><textarea id="c-contact-partners"></textarea>
+        <button class="btn" style="margin-top: 15px;">Submit</button>
+    </form>
+    <div id="customerSuccess" style="display:none; margin-top:20px; font-size:22px; font-weight:bold;">You are registered!</div>
 </div>
 
 <div id="adminLoginBtn">Admin Area (Password required)</div>
 
 <!-- Admin Section -->
 <div id="adminSection" style="display:none;">
-<div class="container">
-<header>
-<h1>Matching system</h1>
-<p>Automatic Grouping</p>
-</header>
+    <div class="container">
+        <header>
+            <h1>Matching System</h1>
+            <p>Automatic Grouping</p>
+        </header>
+        <div class="input-section">
+            <h2>Add Participants</h2>
+            <form id="participant-form">
+                <div class="form-group"><label>Name</label><input id="name" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="role" required>
+                        <option value="">Select Role</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="technical">Technical</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Factory / Location</label><input id="factory" required></div>
+                <div class="form-group"><label>We offer</label><textarea id="we-offer" required></textarea></div>
+                <div class="form-group"><label>We seek</label><textarea id="we-seek" required></textarea></div>
+                <div class="form-group"><label>Key Takeaways</label><textarea id="key-takeaways"></textarea></div>
+                <div class="form-group"><label>Contact Partners</label><textarea id="contact-partners"></textarea></div>
+                <button class="btn btn-success">Add Participant</button>
+            </form>
+            <div id="participants-list" style="margin-top:30px;">
+                <h3>Participants</h3>
+                <div id="participants-container"></div>
+            </div>
+        </div>
 
-<div class="input-section">
-<h2>Add Participants</h2>
-<form id="participant-form">
-<div class="form-group"><label>Name</label><input id="name" required></div>
-<div class="form-group"><label>Role</label>
-<select id="role" required>
-<option value="">Select Role</option>
-<option value="commercial">Commercial</option>
-<option value="technical">Technical</option>
-</select>
-</div>
-<div class="form-group"><label>Factory / Location</label><input id="factory" required></div>
-<div class="form-group"><label>We offer</label><textarea id="we-offer" required></textarea></div>
-<div class="form-group"><label>We seek</label><textarea id="we-seek" required></textarea></div>
-<div class="form-group"><label>Key Takeaways</label><textarea id="key-takeaways"></textarea></div>
-<div class="form-group"><label>Contact Partners</label><textarea id="contact-partners"></textarea></div>
-<button class="btn btn-success">Add Participant</button>
-</form>
-
-<div id="participants-list" style="margin-top:30px;">
-<h3>Participants</h3>
-<div id="participants-container"></div>
-</div>
-</div>
-
-<div class="results-section">
-<h2>Create Groups</h2>
-<button id="create-groups" class="btn" style="margin-bottom:20px;">Generate Groups</button>
-<div id="loading" class="loading" style="display:none;">
-<div class="spinner"></div>
-<p>AI is analyzing participants...</p>
-</div>
-<div id="results-container"></div>
-</div>
-</div>
+        <div class="results-section">
+            <h2>Create Groups</h2>
+            <button id="create-groups" class="btn" style="margin-bottom:8px;">Generate Groups</button>
+            <div class="alt-panel" style="margin-bottom:14px;">
+                <label style="font-weight:600; margin-right:6px;">Alternatives</label>
+                <input id="alt-count" type="number" min="1" max="3" value="2" title="Number of alternatives (max 3)">
+                <select id="alt-preference" title="Preference">
+                    <option value="offers" selected>Prefer offers</option>
+                    <option value="balanced">Balanced</option>
+                    <option value="seeks">Prefer seeks</option>
+                </select>
+                <button id="generate-alternatives" class="btn">Generate Alternatives</button>
+            </div>
+            <div id="loading" class="loading" style="display:none;">
+                <div class="spinner"></div>
+                <p>AI is analyzing participants...</p>
+            </div>
+            <div id="results-container"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-// --- Firebase init ---
+// ---------------- Firebase initialization ----------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCoNXOOdXyrDU43I3oaAQhNzD-sW9qlIk4",
-  authDomain: "werkleiter-mat.firebaseapp.com",
-  projectId: "werkleiter-mat",
-  storageBucket: "werkleiter-mat.firebasestorage.app",
-  messagingSenderId: "274812390256",
-  appId: "1:274812390256:web:181e0a87484ec283a95db5"
+    apiKey: "AIzaSyCoNXOOdXyrDU43I3oaAQhNzD-sW9qlIk4",
+    authDomain: "werkleiter-mat.firebaseapp.com",
+    projectId: "werkleiter-mat",
+    storageBucket: "werkleiter-mat.firebasestorage.app",
+    messagingSenderId: "274812390256",
+    appId: "1:274812390256:web:181e0a87484ec283a95db5"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// --- Participants Array ---
+// ---------------- OpenAI key (ersetzen!) ----------------
+// Tipp: In Produktion niemals den API-Key im Frontend speichern.
+// Nutze stattdessen einen Backend-Proxy.
+const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+
+// ---------------- Helpers ----------------
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function escapeHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+// ---------------- GPT Erklärung ----------------
+async function fetchGPTExplanation(payloadText) {
+    if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY_HERE') {
+        return 'No API key provided — local explanation omitted.';
+    }
+    const prompt = `You are an assistant. Explain concisely (in English) why the following grouping(s) are sensible based on participants' "we offer" and "we seek".\n\n${payloadText}\n\nProvide a short clear explanation for each grouping.`;
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 300,
+            temperature: 0.6
+        })
+    });
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'OpenAI API error');
+    }
+    const data = await resp.json();
+    return data.choices?.[0]?.message?.content?.trim() || 'No explanation returned.';
+}
+
+// ---------------- Participants ----------------
 let participants = [];
 
-// --- Admin Login ---
+// ---------------- Admin Login ----------------
 document.getElementById("adminLoginBtn").onclick = () => {
     let password = prompt("Enter admin password:");
-    if(password !== "admin123") { alert("Wrong password!"); return; }
+    if (password !== "admin123") { alert("Wrong password!"); return; }
     document.getElementById("adminSection").style.display = "block";
     document.getElementById("customerSection").style.display = "none";
     document.getElementById("adminLoginBtn").style.display = "none";
 };
 
-// --- Listen to Firebase participants live ---
+// ---------------- Firestore listener ----------------
 db.collection("participants").orderBy("created").onSnapshot(snapshot => {
     participants = [];
     snapshot.forEach(doc => {
-        participants.push({...doc.data(), id: doc.id});
+        const d = doc.data() || {};
+        participants.push({
+            id: doc.id,
+            name: d.name || '',
+            role: d.role || '',
+            factory: d.factory || '',
+            weOffer: d.weOffer || '',
+            weSeek: d.weSeek || '',
+            keyTakeaways: d.keyTakeaways || '',
+            contactPartners: d.contactPartners || ''
+        });
     });
     updateParticipantsList();
 });
 
-// --- Customer form submit to Firebase ---
-document.getElementById("customerForm").addEventListener("submit",(e)=>{
+// ---------------- Customer form submit ----------------
+document.getElementById("customerForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const entry = {
-        name: document.getElementById("c-name").value,
-        role: document.getElementById("c-role").value, // Rolle hinzufügen
-        factory: document.getElementById("c-factory").value,
-        weOffer: document.getElementById("c-offer").value,
-        weSeek: document.getElementById("c-seek").value,
-        keyTakeaways: document.getElementById("c-key-takeaways").value,
-        contactPartners: document.getElementById("c-contact-partners").value,
+        name: document.getElementById("c-name").value.trim(),
+        role: document.getElementById("c-role").value,
+        factory: document.getElementById("c-factory").value.trim(),
+        weOffer: document.getElementById("c-offer").value.trim(),
+        weSeek: document.getElementById("c-seek").value.trim(),
+        keyTakeaways: document.getElementById("c-key-takeaways").value.trim(),
+        contactPartners: document.getElementById("c-contact-partners").value.trim(),
         created: firebase.firestore.FieldValue.serverTimestamp()
     };
-    db.collection("participants").add(entry).then(()=>{
+    if (!entry.name || !entry.role || !entry.factory || !entry.weOffer || !entry.weSeek) { alert("Bitte fülle alle Pflichtfelder aus."); return; }
+    db.collection("participants").add(entry).then(() => {
         document.getElementById("customerForm").reset();
-        document.getElementById("customerForm").style.display = "none";
         document.getElementById("customerSuccess").style.display = "block";
-    });
+        setTimeout(()=>document.getElementById("customerSuccess").style.display = "none", 2500);
+    }).catch(err => { console.error(err); alert('Fehler beim Registrieren.'); });
 });
 
-// --- Update Participants list ---
+// ---------------- Update list ----------------
 const participantsContainer = document.getElementById('participants-container');
-function updateParticipantsList(){
+function updateParticipantsList() {
     participantsContainer.innerHTML = '';
-    if(participants.length === 0) {
-        participantsContainer.innerHTML = '<p>No participants yet.</p>';
-        return;
-    }
-    participants.forEach((p,index)=>{
-        const card=document.createElement('div');
-        card.className='participant-card';
-        card.innerHTML=`
-        <strong>${p.name}</strong>
-        <span class="role-badge role-${p.role}">${p.role==='commercial'?'Commercial':'Technical'}</span>
-        <br><br>
-        <strong>Factory:</strong> ${p.factory}<br>
-        <strong>Offer:</strong> ${p.weOffer}<br>
-        <strong>Seek:</strong> ${p.weSeek}<br>
-        <strong>Key Takeaways:</strong> ${p.keyTakeaways || '-'}<br>
-        <strong>Contact Partners:</strong> ${p.contactPartners || '-'}<br><br>
-        <button onclick="removeParticipant('${p.id}')" class="btn" style="background:#e74c3c;">Remove</button>`;
+    if (!participants || participants.length === 0) { participantsContainer.innerHTML = '<p>No participants yet.</p>'; return; }
+    participants.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'participant-card';
+        const roleLabel = (p.role === 'commercial') ? 'Commercial' : (p.role === 'technical' ? 'Technical' : 'Unknown');
+        const roleClass = p.role === 'commercial' ? 'role-commercial' : (p.role === 'technical' ? 'role-technical' : '');
+        card.innerHTML = `
+            <strong>${escapeHtml(p.name)}</strong>
+            <span class="role-badge ${roleClass}">${roleLabel}</span>
+            <br><br>
+            <strong>Factory:</strong> ${escapeHtml(p.factory)}<br>
+            <strong>Offer:</strong> ${escapeHtml(p.weOffer)}<br>
+            <strong>Seek:</strong> ${escapeHtml(p.weSeek)}<br>
+            <strong>Key Takeaways:</strong> ${escapeHtml(p.keyTakeaways || '-')}<br>
+            <strong>Contact Partners:</strong> ${escapeHtml(p.contactPartners || '-')}<br><br>
+            <button class="btn" style="background:#e74c3c;">Remove</button>`;
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', () => removeParticipant(p.id));
         participantsContainer.appendChild(card);
     });
 }
 
-// --- Remove participant ---
-window.removeParticipant=function(id){
-    db.collection("participants").doc(id).delete();
+// ---------------- Remove ----------------
+window.removeParticipant = function (id) {
+    if (!id) return;
+    db.collection("participants").doc(id).delete().catch(err => { console.error(err); alert('Fehler beim Entfernen.'); });
 };
 
-// --- Admin add participant manually ---
-document.getElementById('participant-form').addEventListener('submit',(e)=>{
+// ---------------- Admin add manually ----------------
+document.getElementById('participant-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const p = {
-        name: document.getElementById('name').value,
+        name: document.getElementById('name').value.trim(),
         role: document.getElementById('role').value,
-        factory: document.getElementById('factory').value,
-        weOffer: document.getElementById('we-offer').value,
-        weSeek: document.getElementById('we-seek').value,
-        keyTakeaways: document.getElementById('key-takeaways').value,
-        contactPartners: document.getElementById('contact-partners').value,
+        factory: document.getElementById('factory').value.trim(),
+        weOffer: document.getElementById('we-offer').value.trim(),
+        weSeek: document.getElementById('we-seek').value.trim(),
+        keyTakeaways: document.getElementById('key-takeaways').value.trim(),
+        contactPartners: document.getElementById('contact-partners').value.trim(),
         created: firebase.firestore.FieldValue.serverTimestamp()
     };
-    db.collection("participants").add(p);
-    document.getElementById('participant-form').reset();
+    if (!p.name || !p.role || !p.factory || !p.weOffer || !p.weSeek) { alert("Bitte fülle alle Pflichtfelder aus."); return; }
+    db.collection("participants").add(p).then(()=>document.getElementById('participant-form').reset()).catch(err=>{console.error(err); alert('Fehler.');});
 });
 
-// --- KI & Group generation ---
-const API_KEY = "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";
+// ---------------- Tokenizer & scoring ----------------
+function tokens(text) {
+    if (!text) return new Set();
+    try { return new Set(String(text).toLowerCase().replace(/[^\w\säöüß]/g,' ').split(/\s+/).filter(Boolean)); }
+    catch(e){ return new Set(); }
+}
+const WEIGHT_OFFER = 2.5; // increased from 2.0
+const WEIGHT_SEEK = 1.0;
+function pairScore(a, b, offerWeight = WEIGHT_OFFER, seekWeight = WEIGHT_SEEK) {
+    const aOffer = tokens(a.weOffer), aSeek = tokens(a.weSeek);
+    const bOffer = tokens(b.weOffer), bSeek = tokens(b.weSeek);
+    const inter = (s, t) => { let c = 0; for (const x of s) if (t.has(x)) c++; return c; };
+    return offerWeight * inter(aOffer, bSeek)
+        + offerWeight * inter(aSeek, bOffer)
+        + inter(aOffer, bOffer)
+        + inter(aSeek, bSeek) * 0.5;
+}
+
+// ---------------- Deterministic grouping (one variant) ----------------
+function generateGroupsDeterministic(allParticipants, numGroups = 4, opts = {}) {
+    const valid = Array.isArray(allParticipants) ? allParticipants.filter(p => p && p.name) : [];
+    if (valid.length === 0) return [];
+    numGroups = Math.max(1, Math.min(valid.length, Math.floor(Number(numGroups) || 4)));
+    const groups = Array.from({ length: numGroups }, (_, i) => ({ title: `Group ${i + 1}`, members: [] }));
+    const pool = valid.slice();
+    const targetSize = Math.ceil(pool.length / numGroups);
+    // Seed groups with participants having most text
+    for (let g = 0; g < numGroups; g++) {
+        if (pool.length === 0) break;
+        let bestIdx = 0, bestVal = -Infinity;
+        for (let i = 0; i < pool.length; i++) {
+            const p = pool[i];
+            const val = (p.weOffer || '').split(/\s+/).filter(Boolean).length + (p.weSeek || '').split(/\s+/).filter(Boolean).length;
+            if (val > bestVal) { bestVal = val; bestIdx = i; }
+        }
+        groups[g].members.push(pool.splice(bestIdx,1)[0]);
+    }
+    // Fill groups greedily
+    while (pool.length > 0) {
+        let best = { gIdx: -1, pIdx: -1, score: -Infinity };
+        for (let gi = 0; gi < groups.length; gi++) {
+            if (groups[gi].members.length >= targetSize) continue;
+            for (let pi = 0; pi < pool.length; pi++) {
+                let score = 0;
+                for (const m of groups[gi].members) score += pairScore(m, pool[pi], opts.offerWeight || WEIGHT_OFFER, opts.seekWeight || WEIGHT_SEEK);
+                if (score > best.score) best = { gIdx: gi, pIdx: pi, score };
+            }
+        }
+        if (best.gIdx === -1 || best.score <= 0) {
+            // distribute remaining round-robin
+            let gi = 0;
+            while (pool.length > 0) {
+                groups[gi % groups.length].members.push(pool.shift());
+                gi++;
+            }
+            break;
+        } else {
+            groups[best.gIdx].members.push(pool.splice(best.pIdx,1)[0]);
+        }
+    }
+    return groups.map((g,i)=>({ title: g.title || `Group ${i+1}`, members: Array.isArray(g.members)?g.members:[] }));
+}
+
+// ---------------- Utilities for alternatives ----------------
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+function shuffleWithSeed(arr, seed) {
+  const rnd = mulberry32(seed);
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+// generate one variant with slight perturbation depending on preference and seed
+function generateOneVariant(allParticipants, numGroups, seed, preference) {
+    // adjust weights based on preference
+    let offerW = WEIGHT_OFFER, seekW = WEIGHT_SEEK;
+    if (preference === 'offers') { offerW = WEIGHT_OFFER * 1.3; seekW = WEIGHT_SEEK * 0.9; }
+    else if (preference === 'seeks') { offerW = WEIGHT_OFFER * 0.9; seekW = WEIGHT_SEEK * 1.3; }
+    // shuffle deterministically for different seeds
+    const pool = shuffleWithSeed(allParticipants.slice(), seed);
+    // use same deterministic algorithm but with overridden weights
+    return generateGroupsDeterministic(pool, numGroups, { offerWeight: offerW, seekWeight: seekW });
+}
+// generate multiple alternatives (max 3)
+async function generateAlternatives(allParticipants, count = 2, numGroups = 4, preference = 'offers') {
+    const variants = [];
+    const seen = new Set();
+    let baseSeed = Date.now() % 100000;
+    for (let i = 0; i < Math.min(3, Math.max(1, count)); i++) {
+        const seed = baseSeed + i * 997;
+        const v = generateOneVariant(allParticipants, numGroups, seed, preference);
+        // signature to avoid duplicates
+        const sig = v.map(g => g.members.map(m => m.id || m.name).sort().join('|')).sort().join('||');
+        if (!seen.has(sig)) { seen.add(sig); variants.push(v); }
+    }
+    return variants;
+}
+
+// ---------------- UI & group generation handlers ----------------
 const createGroupsBtn = document.getElementById('create-groups');
+const generateAlternativesBtn = document.getElementById('generate-alternatives');
 const resultsContainer = document.getElementById('results-container');
 const loadingElement = document.getElementById('loading');
 
-async function callChatGPT(prompt) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: "You are an assistant for Werkleiter Matching. Create 4 groups from participants. Use fields Name, Role, We Offer, We Seek, Key Takeaways, Contact Partners." },
-                { role: "user", content: prompt }
-            ]
-        })
-    });
-    const data = await response.json();
-    if (!data.choices || !data.choices[0].message) throw new Error("Invalid API response");
-    return data.choices[0].message.content;
-}
-
-createGroupsBtn.addEventListener('click', async ()=>{
-    if(participants.length<4){ alert("At least 4 participants required."); return; }
-
-    loadingElement.style.display='block';
-    resultsContainer.innerHTML='';
-
+createGroupsBtn.addEventListener('click', async () => {
     try {
-        const prompt = `Create 4 groups from the following participants:\n${JSON.stringify(participants,null,2)}\nFormat:\n## Group 1\nMembers: ...\nExplanation: ...`;
-        const text = await callChatGPT(prompt);
-
-        const groups = text.split("## ").filter(x=>x.trim()!=="");
-        resultsContainer.innerHTML = "";
-
-        groups.forEach(group=>{
-            const lines = group.split("\n").map(l=>l.trim());
-            const title = lines[0];
-            let members="", expl="";
-            lines.forEach(l=>{
-                if(l.toLowerCase().startsWith("members:")) members=l.replace(/Members:/i,"").trim();
-                if(l.toLowerCase().startsWith("explanation:")) expl=l.replace(/Explanation:/i,"").trim();
-            });
-            const box=document.createElement("div");
-            box.className="participant-card";
-            box.innerHTML=`<h3>${title}</h3><div><strong>Members:</strong> ${members}</div><button class="btn" style="margin-top:10px;padding:5px 10px;">Show Explanation</button><div class="explanation-full">${expl}</div>`;
-            const btn = box.querySelector("button");
-            const exp = box.querySelector(".explanation-full");
-            btn.onclick=()=>{ exp.style.display = exp.style.display==="block"?"none":"block"; };
+        if (!participants || participants.length < 4) { alert("At least 4 participants required."); return; }
+        loadingElement.style.display = 'block';
+        resultsContainer.innerHTML = '';
+        await sleep(700);
+        const extra = 1500 + Math.floor(Math.random()*2000); // 1.5s - 3.5s
+        await sleep(extra);
+        const groups = generateGroupsDeterministic(participants, 4);
+        if (!groups || groups.length === 0) { resultsContainer.innerHTML = '<p>Keine Gruppen generiert.</p>'; loadingElement.style.display='none'; return; }
+        resultsContainer.innerHTML = '';
+        for (let i=0;i<groups.length;i++){
+            const group = groups[i];
+            const box = document.createElement('div');
+            box.className = 'participant-card';
+            const members = group.members.map(m=>escapeHtml(m.name||'-')).join(', ');
+            box.innerHTML = `<h3>${escapeHtml(group.title)}</h3><div><strong>Members:</strong> ${members || '-'}</div>`;
+            const explainEl = document.createElement('div');
+            explainEl.className = 'explanation-full';
+            explainEl.style.display = 'none';
+            explainEl.innerText = 'Explanation generating...';
+            box.appendChild(explainEl);
             resultsContainer.appendChild(box);
-        });
-
-    } catch(e) {
-        resultsContainer.innerHTML="<p>Error with AI.</p>";
+            await sleep(200);
+        }
+        // build prompt once for full grouping
+        const groupingText = groups.map(g => `${g.title}: ${g.members.map(m=>`${m.name} (${m.role})`).join(', ')}`).join('\n');
+        try {
+            const explanation = await fetchGPTExplanation(groupingText);
+            const explainBlocks = resultsContainer.querySelectorAll('.explanation-full');
+            explainBlocks.forEach(el => { el.innerText = explanation; el.style.display = 'block'; });
+        } catch (e) {
+            console.error(e);
+            const explainBlocks = resultsContainer.querySelectorAll('.explanation-full');
+            explainBlocks.forEach(el => { el.innerText = 'Explanation failed.'; el.style.display = 'block'; });
+        }
+    } catch (err) {
+        console.error(err);
+        resultsContainer.innerHTML = '<p>Error generating groups. Please try again.</p>';
+    } finally {
+        await sleep(200);
+        loadingElement.style.display = 'none';
     }
-
-    loadingElement.style.display='none';
 });
 
-// --- Example participants ---
+// Generate Alternatives handler
+generateAlternativesBtn.addEventListener('click', async () => {
+    try {
+        if (!participants || participants.length < 4) { alert("At least 4 participants required."); return; }
+        const count = Math.max(1, Math.min(3, Number(document.getElementById('alt-count').value) || 2));
+        const preference = document.getElementById('alt-preference').value || 'offers';
+        loadingElement.style.display = 'block';
+        resultsContainer.innerHTML = '';
+        await sleep(600);
+        const variants = await generateAlternatives(participants, count, 4, preference);
+        if (!variants || variants.length === 0) { resultsContainer.innerHTML = '<p>No alternatives generated.</p>'; loadingElement.style.display='none'; return; }
+        for (let vi = 0; vi < variants.length; vi++) {
+            const variant = variants[vi];
+            const container = document.createElement('div');
+            container.className = 'participant-card';
+            container.innerHTML = `<h3>Alternative ${vi+1}</h3>`;
+            variant.forEach(g => {
+                const div = document.createElement('div');
+                div.innerHTML = `<strong>${escapeHtml(g.title)}</strong>: ${escapeHtml(g.members.map(m=>m.name).join(', ') || '-')}`;
+                container.appendChild(div);
+            });
+            const explainEl = document.createElement('div');
+            explainEl.className = 'explanation-full';
+            explainEl.style.display = 'none';
+            explainEl.innerText = 'Fetching explanation...';
+            container.appendChild(explainEl);
+            resultsContainer.appendChild(container);
+            await sleep(400 + Math.floor(Math.random()*400));
+            const promptGroups = variant.map(g => `${g.title}: ${g.members.map(m =>`${m.name} (${m.role})`).join(', ')}`).join('\n');
+            try {
+                const explanation = await fetchGPTExplanation(promptGroups);
+                explainEl.innerText = explanation;
+                explainEl.style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                explainEl.innerText = 'Explanation failed.';
+                explainEl.style.display = 'block';
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        resultsContainer.innerHTML = '<p>Error generating alternatives.</p>';
+    } finally {
+        loadingElement.style.display = 'none';
+    }
+});
+
+// Example participants (kept empty)
 const exampleParticipants = [
-  {name:"Alice",role:"commercial",factory:"Berlin",weOffer:"Logistics",weSeek:"Supplies",keyTakeaways:"Efficiency",contactPartners:"Bob"},
-  {name:"Bob",role:"technical",factory:"Munich",weOffer:"Engineering",weSeek:"Components",keyTakeaways:"Innovation",contactPartners:"Alice"},
-  {name:"Charlie",role:"commercial",factory:"Hamburg",weOffer:"Consulting",weSeek:"Partners",keyTakeaways:"Networking",contactPartners:"David"},
-  {name:"David",role:"technical",factory:"Frankfurt",weOffer:"Maintenance",weSeek:"Tools",keyTakeaways:"Safety",contactPartners:"Charlie"},
-  {name:"Eva",role:"commercial",factory:"Stuttgart",weOffer:"Marketing",weSeek:"Clients",keyTakeaways:"Branding",contactPartners:"Frank"},
-  {name:"Frank",role:"technical",factory:"Cologne",weOffer:"Automation",weSeek:"Parts",keyTakeaways:"Precision",contactPartners:"Eva"},
-  {name:"Grace",role:"commercial",factory:"Leipzig",weOffer:"Sales",weSeek:"Leads",keyTakeaways:"Growth",contactPartners:"Hannah"},
-  {name:"Hannah",role:"technical",factory:"Dresden",weOffer:"Support",weSeek:"Hardware",keyTakeaways:"Reliability",contactPartners:"Grace"},
-  {name:"Ian",role:"commercial",factory:"Bremen",weOffer:"Strategy",weSeek:"Consultants",keyTakeaways:"Planning",contactPartners:"Jack"},
-  {name:"Jack",role:"technical",factory:"Nuremberg",weOffer:"Software",weSeek:"APIs",keyTakeaways:"Integration",contactPartners:"Ian"},
-  {name:"Karen",role:"commercial",factory:"Hannover",weOffer:"Finance",weSeek:"Investors",keyTakeaways:"Profit",contactPartners:"Leo"},
-  {name:"Leo",role:"technical",factory:"Dortmund",weOffer:"Production",weSeek:"Materials",keyTakeaways:"Efficiency",contactPartners:"Karen"},
-  {name:"Mona",role:"commercial",factory:"Essen",weOffer:"HR",weSeek:"Talents",keyTakeaways:"Teamwork",contactPartners:"Nina"},
-  {name:"Nina",role:"technical",factory:"Bonn",weOffer:"Design",weSeek:"Components",keyTakeaways:"Innovation",contactPartners:"Mona"},
-  {name:"Oscar",role:"commercial",factory:"Kiel",weOffer:"Legal",weSeek:"Guidance",keyTakeaways:"Compliance",contactPartners:"Paul"},
-  {name:"Paul",role:"technical",factory:"Magdeburg",weOffer:"IT",weSeek:"Software",keyTakeaways:"Security",contactPartners:"Oscar"},
-  {name:"Quinn",role:"commercial",factory:"Mainz",weOffer:"Procurement",weSeek:"Vendors",keyTakeaways:"Cost-saving",contactPartners:"Rita"},
-  {name:"Rita",role:"technical",factory:"Saarbrücken",weOffer:"Testing",weSeek:"Tools",keyTakeaways:"Quality",contactPartners:"Quinn"},
-  {name:"Sam",role:"commercial",factory:"Freiburg",weOffer:"Research",weSeek:"Data",keyTakeaways:"Insights",contactPartners:"Tina"},
-  {name:"Tina",role:"technical",factory:"Heidelberg",weOffer:"Support",weSeek:"Hardware",keyTakeaways:"Reliability",contactPartners:"Sam"},
-  {name:"Uma",role:"commercial",factory:"Ulm",weOffer:"Consulting",weSeek:"Clients",keyTakeaways:"Networking",contactPartners:"Victor"},
-  {name:"Victor",role:"technical",factory:"Würzburg",weOffer:"Engineering",weSeek:"Parts",keyTakeaways:"Innovation",contactPartners:"Uma"},
-  {name:"Wendy",role:"commercial",factory:"Regensburg",weOffer:"Marketing",weSeek:"Partners",keyTakeaways:"Branding",contactPartners:"Xander"},
-  {name:"Xander",role:"technical",factory:"Kassel",weOffer:"Automation",weSeek:"Components",keyTakeaways:"Precision",contactPartners:"Wendy"},
-  {name:"Yara",role:"commercial",factory:"Augsburg",weOffer:"Sales",weSeek:"Leads",keyTakeaways:"Growth",contactPartners:"Zane"},
-  {name:"Zane",role:"technical",factory:"Potsdam",weOffer:"Maintenance",weSeek:"Tools",keyTakeaways:"Safety",contactPartners:"Yara"},
+    // example entries...
 ];
 
-// --- Add example participants to Firebase (only if DB is empty) ---
-db.collection("participants").get().then(snapshot=>{
-    if(snapshot.empty){
-        exampleParticipants.forEach(p=>{
-            db.collection("participants").add({...p, created: firebase.firestore.FieldValue.serverTimestamp()});
-        });
+// Add example participants only if DB empty
+db.collection("participants").get().then(snapshot => {
+    if (snapshot.empty && exampleParticipants.length > 0) {
+        exampleParticipants.forEach(p => db.collection("participants").add({ ...p, created: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>console.error(err)));
     }
-});
+}).catch(err => console.error(err));
 </script>
 </body>
 </html>
-
-
